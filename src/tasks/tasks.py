@@ -23,4 +23,5 @@ def parse_page_task(db: Session, task: Task):
         result["scripts"].append(task.url + source.get('src'))
 
     task.data = str(result)
-    update_task(db, task)
+    task.status = 20
+    return update_task(db, task)
