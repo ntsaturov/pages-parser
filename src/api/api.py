@@ -17,7 +17,7 @@ def get_db():
 
 
 @router.post("/tasks/parse_page")
-def parse_page(body: TaskBody,  background_tasks: BackgroundTasks,  db: Session = Depends(get_db)):
+def parse_page(body: TaskBody, db: Session = Depends(get_db)):
     task = crud.create_task(db, **body.dict())
     return task
 
