@@ -1,15 +1,12 @@
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from src.db.connector import SessionLocal
 from src.db.crud import crud
+from src.db.schemas.schemas import TaskBody
+from src.tasks.tasks import parse_page_task
 
 router = APIRouter(prefix="/api")
-
-
-class TaskBody(BaseModel):
-    url: str
 
 
 def get_db():
@@ -21,8 +18,9 @@ def get_db():
 
 
 @router.post("/tasks/parse_page")
-def parse_page(body: TaskBody,  db: Session = Depends(get_db)):
+def parse_page(body: TaskBody,  background_tasks: BackgroundTasks,  db: Session = Depends(get_db)):
     task = crud.create_task(db, **body.dict())
+    background_tasks.add_task(parse_page_task, db, task)
     return task
 
 
