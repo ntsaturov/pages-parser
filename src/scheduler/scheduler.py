@@ -12,7 +12,6 @@ from src.tasks.tasks import parse_page_task
 class TasksScheduler:
     def __init__(self, max_workers=5):
         self._max_workers = max_workers
-        self.shutdown = False
 
     def __run(self, db: Session = next(get_db())):
         while True:

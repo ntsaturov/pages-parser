@@ -1,5 +1,3 @@
-import logging
-
 from fastapi import FastAPI
 from src.api.api import router
 from src.scheduler.scheduler import TasksScheduler
