@@ -51,5 +51,3 @@ run_app:build_app ## run docker-compose app
 
 stop_app: ## stop docker-compose app
 	sudo docker-compose -f infra/docker-compose.yml stop
-
-run_local: ## run local without docker-compose

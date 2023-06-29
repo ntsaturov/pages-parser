@@ -1,15 +1,14 @@
 # pages-parser
 Manager of page-parser tasks
 
-
 #### ADT description
 
-#### Purpose
 
-#### Installation
+#### Build image and run app
+    make run_app
 
-#### Build image and run it
-
-#### Build image
-
-#### Run project
+#### Run project local without docker-compose
+    poetry install
+    poetry shell
+    ./scripts/create-db-container.sh
+    uvicorn run:app --reload
