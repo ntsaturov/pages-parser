@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "pages-parser"
+version = "0.1.0"
+description = "Manager of page-parser tasks"
+authors = [
+    "Nikita Tsaturov <tsaturov.n@gmail.com>",
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "0.98.0"
+pydantic = "1.10.9"
+SQLAlchemy = "2.0.17"
+psycopg2 = "2.9.6"
+requests = "2.31.0"
+beautifulsoup4 = "4.12.2"
+uvicorn = "0.22.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
