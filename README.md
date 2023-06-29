@@ -13,10 +13,10 @@ data text - результат выполнения задачи
 
 Примеры запросов:
 
-1. Создание задачи:
-Endpoint: /api/tasks/parse_page
-Method: Post
-Request:
+##### 1. Создание задачи:
+<br> Endpoint: /api/tasks/parse_page
+<br>Method: Post
+<br>Request:
 ```
 {
   "url": "https://example.com"
@@ -35,9 +35,9 @@ Response:
 }
 ```
 
-2. Просмотр статус задачи и результата:
-Endpoint: /api/tasks/957d326d-b9f9-4b05-ab13-1f3bdd136d6f
-Method: GET
+##### 2. Просмотр статуса задачи и результата:
+<br>Endpoint: /api/tasks/957d326d-b9f9-4b05-ab13-1f3bdd136d6f
+<br>Method: GET
 
 Response:
 ```
