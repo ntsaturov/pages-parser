@@ -9,8 +9,8 @@ CREATE TABLE tasks (
     data text
 );
 
-insert into tasks (id, creation_timestamp, status, url, data) values (1, now(), 0, 'http://url_1.ru', 'some test data');
-insert into tasks (id, creation_timestamp, status, url, data) values (2, now(), 0, 'http://url_2.ru', 'some test data');
-insert into tasks (id, creation_timestamp, status, url, data) values (3, now(), 0, 'http://url_3.ru', 'some test data');
-insert into tasks (id, creation_timestamp, status, url, data) values (4, now(), 0, 'http://url_4.ru', 'some test data');
-insert into tasks (id, creation_timestamp, status, url, data) values (5, now(), 0, 'http://url_5.ru', 'some test data');
+insert into tasks (id, creation_timestamp, status, url, data) values (1, now(), 0, 'https://dzen.ru/', '');
+insert into tasks (id, creation_timestamp, status, url, data) values (2, now(), 0, 'https://askubuntu.com/', '');
+insert into tasks (id, creation_timestamp, status, url, data) values (3, now(), 0, 'https://github.com', '');
+insert into tasks (id, creation_timestamp, status, url, data) values (4, now(), 0, 'https://habr.com', '');
+insert into tasks (id, creation_timestamp, status, url, data) values (5, now(), 0, 'https://example.com/', '');
