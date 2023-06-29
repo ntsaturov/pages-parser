@@ -42,3 +42,14 @@ build:#env ## build docker image
 	    --progress=plain \
 	    -f infra/Dockerfile \
 	    . -t python_base_image)
+
+build_app: ## build docker-compose app
+	sudo docker-compose -f infra/docker-compose.yml build
+
+run_app:build_app ## run docker-compose app
+	sudo docker-compose -f infra/docker-compose.yml up -d
+
+stop_app: ## stop docker-compose app
+	sudo docker-compose -f infra/docker-compose.yml stop
+
+run_local: ## run local without docker-compose
