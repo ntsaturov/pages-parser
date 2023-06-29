@@ -19,10 +19,12 @@ FROM base AS runner
 
 WORKDIR /app
 
+RUN apk add libpq-dev
 COPY --from=compile /app/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 ADD ./src  /app/src
 ADD ./*.py /app/
 ADD ./settings.toml /app/
 
 EXPOSE 8080
-CMD ["/bin/bash", "-c", "uvicorn run:app --port 8080 --host 0.0.0.0 --log-level error"]
+CMD ["/bin/sh", "-c", "uvicorn run:app --port 8080 --host 0.0.0.0 --log-level error"]
