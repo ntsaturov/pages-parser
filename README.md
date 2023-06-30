@@ -6,15 +6,23 @@ Manager of page-parser tasks
 ```
 Описание задачи в папке docs -> "task_description.pdf".
 Решение:
-Инициализируем 2 отдельных модуля - FastApi с двумя эндпоинтами (get-task-by-id и parse-page - для создания задачи) и в отдельном потоке TaskScheduler (thread-pool из n воркеров) для выполнения задач.
+Инициализируем 2 отдельных модуля - FastApi с двумя эндпоинтами
+(get-task-by-id и parse-page - для создания задачи)
+и в отдельном потоке TaskScheduler (thread-pool из n воркеров) для выполнения задач.
 Принцип работы сервиса достаточно прост:
-1. Создаем задачу через parse_page отправля url post-запросом;
+1. Создаем задачу через parse_page отправляя url post-запросом;
 2. Задача на парсинг попадает в очередь со статусом "0" - created;
 3. Далее TaskScheduler берет из базы задачи и переводит их в статус "10" - in progress. 
-P.S.: Для предотвращения гонок или одновременного выполнения одной и той же задачи из разных потоков или инстансев, берем задачи из базы следующим запросом 
-"update tasks as b set status = 10 from (select * from tasks where status=0 order by creation_timestamp for update skip locked) as a where b.id = a.id  returning b.*;" 
+P.S.: Для предотвращения гонок или одновременного выполнения одной и той же
+задачи из разных потоков или инстансев, берем задачи из базы следующим запросом:
+
+"update tasks as b set status = 10 from
+(select * from tasks where status=0 order by creation_timestamp for update skip locked)
+as a where b.id = a.id  returning b.*;"
+
 блокируя выбранные записи на уровне таблицы с помощью "for update skip locked".
-4. Далее парсим url из каждой задачи, получаем данные со страницы и переводим каждую из задач в статус 20 (если все прошло удачно), либо в статус 21 (если задача завершилась с ошибкой).
+4. Далее парсим url из каждой задачи, получаем данные со страницы и
+переводим каждую из задач в статус 20 (если все прошло удачно), либо в статус 21 (если задача завершилась с ошибкой).
 ```
 
 <img src="https://github.com/ntsaturov/pages-parser/blob/main/docs/schema.png" width="700" height="450">
