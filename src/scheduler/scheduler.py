@@ -1,5 +1,5 @@
 import concurrent.futures
-import time
+import logging
 from threading import Thread
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -12,7 +12,9 @@ from src.tasks.tasks import parse_page_task
 
 class TasksScheduler:
     def __init__(self, max_workers=4):
+        _log_format = f"%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s - %(message)s"
         self._max_workers = max_workers
+        logging.basicConfig(level=logging.DEBUG, format=_log_format)
 
     def __run(self, db: Session = next(get_db())):
         while True:
@@ -23,11 +25,11 @@ class TasksScheduler:
                     try:
                         data = future.result()
                     except SQLAlchemyError as e:
-                        print(e)
+                        logging.error("SQLAlchemyError: %s" % e)
                     except Exception as e:
-                        print('%r generated an exception: %s' % (url, e))
+                        logging.error('%r finished with error: %s' % (url, e))
                     else:
-                        print(data)
+                        logging.info(data)
 
     def run(self):
         t = Thread(target=self.__run)
