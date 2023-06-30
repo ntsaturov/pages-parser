@@ -1,6 +1,8 @@
 # pages-parser
 Manager of page-parser tasks
 
+<img src="https://github.com/ntsaturov/pages-parser/blob/main/docs/schema.png" width="700" height="450">
+
 #### Structure of DB table
 ```
 id character varying(255) - UUID
