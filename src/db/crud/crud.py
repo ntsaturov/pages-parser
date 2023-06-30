@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from src.db.models import models
 from src.db.models.models import Task
+from sqlalchemy import text
 
 
 def get_task(db: Session, task_id: str):
@@ -12,6 +13,15 @@ def get_task(db: Session, task_id: str):
 
 def get_tasks(db: Session):
     return db.query(models.Task).filter(models.Task.status == 0)
+
+
+def get_and_update_tasks(db: Session):
+    sql = text("update tasks as b set status = 10 "
+               "from (select * from tasks where status=0 order by creation_timestamp asc "
+               "for update skip locked) as a where b.id = a.id  returning b.*")
+    results = db.execute(sql)
+    db.commit()
+    return results
 
 
 def create_task(db: Session, url: str):
@@ -24,7 +34,11 @@ def create_task(db: Session, url: str):
 
 def update_task(db: Session, task: Task):
     row = db.get(Task, task.id)
-    db.add(row)
-    db.commit()
-    db.refresh(row)
+    if row:
+        row.status = task.status
+        row.data = task.data
+        row.execution_timestamp = task.execution_timestamp
+        db.add(row)
+        db.commit()
+        db.refresh(row)
     return row
