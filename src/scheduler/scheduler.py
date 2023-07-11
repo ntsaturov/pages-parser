@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from src.api.api import get_db
 from src.db.crud.crud import get_and_update_tasks
-from src.tasks.tasks import parse_page_task, get_parse_result
+from src.tasks.tasks import Parser
 
 
 class TasksScheduler:
@@ -28,11 +28,12 @@ class TasksScheduler:
         tasks = []
 
         for row in get_and_update_tasks(self.db):
+            parser = Parser(self.db)
             task = asyncio.create_task(
-                parse_page_task(self.db, row)
+                parser.parse_page_task(row)
             )
 
-            task.add_done_callback(get_parse_result)
+            task.add_done_callback(parser.get_parse_result)
             tasks.append(task)
 
         await asyncio.gather(*tasks)
