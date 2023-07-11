@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
 
+import aiohttp
 import requests
 from bs4 import BeautifulSoup
 from sqlalchemy import Result
@@ -17,8 +18,6 @@ class Parser:
     def get_parse_result(self, task):
         result = task.result()
 
-        print(result["status"])
-
         task = Task(
             id=result["id"],
             execution_timestamp=datetime.now(),
@@ -33,7 +32,13 @@ class Parser:
         update_task(self.db, task)
 
     @staticmethod
-    async def parse_page_task(row: Result):
+    async def _get_page(url):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                data = await resp.text()
+                return data
+
+    async def parse_page(self, row: Result):
         result = {
             "data":
                 {
@@ -47,8 +52,8 @@ class Parser:
         }
 
         try:
-            page = requests.get(row[4], timeout=3)
-            soup = BeautifulSoup(page.content, features="html.parser")
+            page = await self._get_page(row[4])
+            soup = BeautifulSoup(page, features="html.parser")
             for tag in soup.find_all():
                 if tag.name in result.keys():
                     result["data"]["tags"][tag.name] += 1

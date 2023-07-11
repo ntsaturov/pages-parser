@@ -30,7 +30,7 @@ class TasksScheduler:
         for row in get_and_update_tasks(self.db):
             parser = Parser(self.db)
             task = asyncio.create_task(
-                parser.parse_page_task(row)
+                parser.parse_page(row)
             )
 
             task.add_done_callback(parser.get_parse_result)
