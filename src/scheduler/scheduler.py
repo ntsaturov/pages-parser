@@ -1,37 +1,39 @@
-import concurrent.futures
-import logging
-from threading import Thread
+import asyncio
 
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from src.api.api import get_db
 from src.db.crud.crud import get_and_update_tasks
-from src.tasks.tasks import parse_page_task
+from src.tasks.tasks import parse_page_task, get_parse_result
 
 
 class TasksScheduler:
-    def __init__(self, max_workers=4):
-        _log_format = f"%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s - %(message)s"
-        self._max_workers = max_workers
-        logging.basicConfig(level=logging.DEBUG, format=_log_format)
+    def __init__(self, time=2, db: Session = next(get_db())):
+        self.time = time
+        self.db = db
 
-    def __run(self, db: Session = next(get_db())):
+    async def _run(self):
         while True:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
-                exec_future = {executor.submit(parse_page_task, db, task): task for task in get_and_update_tasks(db)}
-                for future in concurrent.futures.as_completed(exec_future):
-                    url = exec_future[future]
-                    try:
-                        data = future.result()
-                    except SQLAlchemyError as e:
-                        logging.error("SQLAlchemyError: %s" % e)
-                    except Exception as e:
-                        logging.error('%r finished with error: %s' % (url, e))
-                    else:
-                        logging.info(data)
+            await self.run()
+            await asyncio.sleep(self.time)
 
-    def run(self):
-        t = Thread(target=self.__run)
-        t.setDaemon(True)
-        t.start()
+    async def _start(self):
+        asyncio.ensure_future(self._run())
+
+    def start(self):
+        loop = asyncio.get_running_loop()
+        loop.create_task(self._start())
+
+    async def run(self):
+        tasks = []
+
+        for row in get_and_update_tasks(self.db):
+            task = asyncio.create_task(
+                parse_page_task(self.db, row)
+            )
+
+            task.add_done_callback(get_parse_result)
+            tasks.append(task)
+
+        await asyncio.gather(*tasks)
+

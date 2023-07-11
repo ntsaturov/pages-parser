@@ -17,7 +17,7 @@ def get_tasks(db: Session):
 
 def get_and_update_tasks(db: Session):
     sql = text("update tasks as b set status = 10 "
-               "from (select * from tasks where status=0 order by creation_timestamp asc "
+               "from (select * from tasks where status=0 order by creation_timestamp asc limit 100"
                "for update skip locked) as a where b.id = a.id  returning b.*")
     results = db.execute(sql)
     db.commit()
