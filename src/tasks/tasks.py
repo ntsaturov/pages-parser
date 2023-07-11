@@ -4,15 +4,15 @@ from datetime import datetime
 import aiohttp
 from bs4 import BeautifulSoup
 from sqlalchemy import Result
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.crud.crud import update_task
 from src.db.models.models import Task
 
 
 class Parser:
-    def __init__(self, db: Session):
-        self.db = db
+    def __init__(self, session: AsyncSession):
+        self.session = session
 
     def get_parse_result(self, task):
         result = task.result()
@@ -28,7 +28,7 @@ class Parser:
         asyncio.create_task(self.write_to_db(task))
 
     async def write_to_db(self, task: Task):
-        update_task(self.db, task)
+        await update_task(self.session, task)
 
     @staticmethod
     async def _get_page(url):

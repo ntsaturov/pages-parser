@@ -1,16 +1,13 @@
 import asyncio
 
-from sqlalchemy.orm import Session
-
-from src.api.api import get_db
+from src.db.connector import get_session
 from src.db.crud.crud import get_and_update_tasks
 from src.tasks.tasks import Parser
 
 
 class TasksScheduler:
-    def __init__(self, time=2, db: Session = next(get_db())):
+    def __init__(self, time=2):
         self.time = time
-        self.db = db
 
     async def _run(self):
         while True:
@@ -26,9 +23,10 @@ class TasksScheduler:
 
     async def run(self):
         tasks = []
-
-        for row in get_and_update_tasks(self.db):
-            parser = Parser(self.db)
+        conn = [item async for item in get_session()]
+        rows = await get_and_update_tasks(conn[0])
+        for row in rows:
+            parser = Parser(conn[0])
             task = asyncio.create_task(
                 parser.parse_page(row)
             )

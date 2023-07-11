@@ -17,6 +17,7 @@ requests = "2.31.0"
 beautifulsoup4 = "4.12.2"
 uvicorn = "0.22.0"
 dynaconf = "^3.1.11"
+asyncpg = "0.28.0"
 
 [tool.poetry.dev-dependencies]
 pylint = "2.14.*"
