@@ -20,7 +20,7 @@ async def get_tasks(session: AsyncSession):
 
 async def get_and_update_tasks(session: AsyncSession):
     sql = text("update tasks as b set status = 10 "
-               "from (select * from tasks where status=0 order by creation_timestamp asc limit 100"
+               "from (select * from tasks where status=0 order by creation_timestamp asc limit 100 "
                "for update skip locked) as a where b.id = a.id  returning b.*")
     results = await session.execute(sql)
     await session.commit()

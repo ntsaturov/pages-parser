@@ -23,16 +23,17 @@ class TasksScheduler:
 
     async def run(self):
         tasks = []
-        conn = [item async for item in get_session()]
-        rows = await get_and_update_tasks(conn[0])
-        for row in rows:
-            parser = Parser(conn[0])
-            task = asyncio.create_task(
-                parser.parse_page(row)
-            )
 
-            task.add_done_callback(parser.get_parse_result)
-            tasks.append(task)
+        async for conn in get_session():
+            rows = await get_and_update_tasks(conn)
+            for row in rows:
+                parser = Parser(conn)
+                task = asyncio.create_task(
+                    parser.parse_page(row)
+                )
 
-        await asyncio.gather(*tasks)
+                task.add_done_callback(parser.get_parse_result)
+                tasks.append(task)
+
+            await asyncio.gather(*tasks)
 
