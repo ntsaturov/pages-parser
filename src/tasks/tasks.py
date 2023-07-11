@@ -2,7 +2,6 @@ import asyncio
 from datetime import datetime
 
 import aiohttp
-import requests
 from bs4 import BeautifulSoup
 from sqlalchemy import Result
 from sqlalchemy.orm import Session
@@ -42,7 +41,7 @@ class Parser:
         result = {
             "data":
                 {
-                    "tags": {}, "scripts": []
+                    "tags": {}, "scripts": [], "message": ""
                 },
             "status": True,
             "message": "",
@@ -62,11 +61,11 @@ class Parser:
             sources = soup.findAll('script', {"src": True})
             for source in sources:
                 result["data"]["scripts"].append(row[4] + source.get('src'))
-            result["message"] = "Parsed successfully"
+                result["data"]["message"] = "Parsed successfully"
 
         except Exception as e:
             result["status"] = False
-            result["message"] = str(e)
+            result["data"]["message"] = str(e)
 
         finally:
             return result
