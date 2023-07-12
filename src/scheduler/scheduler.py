@@ -14,12 +14,9 @@ class TasksScheduler:
             await self.run()
             await asyncio.sleep(self.time)
 
-    async def _start(self):
-        asyncio.ensure_future(self._run())
-
     def start(self):
         loop = asyncio.get_running_loop()
-        loop.create_task(self._start())
+        loop.create_task(self._run())
 
     async def run(self):
         tasks = []
