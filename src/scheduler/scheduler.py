@@ -1,37 +1,36 @@
-import concurrent.futures
-import logging
-from threading import Thread
+import asyncio
 
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
-
-from src.api.api import get_db
+from src.db.connector import get_session
 from src.db.crud.crud import get_and_update_tasks
-from src.tasks.tasks import parse_page_task
+from src.tasks.tasks import Parser
 
 
 class TasksScheduler:
-    def __init__(self, max_workers=4):
-        _log_format = f"%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s - %(message)s"
-        self._max_workers = max_workers
-        logging.basicConfig(level=logging.DEBUG, format=_log_format)
+    def __init__(self, time=2):
+        self.time = time
 
-    def __run(self, db: Session = next(get_db())):
+    async def _run(self):
         while True:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
-                exec_future = {executor.submit(parse_page_task, db, task): task for task in get_and_update_tasks(db)}
-                for future in concurrent.futures.as_completed(exec_future):
-                    url = exec_future[future]
-                    try:
-                        data = future.result()
-                    except SQLAlchemyError as e:
-                        logging.error("SQLAlchemyError: %s" % e)
-                    except Exception as e:
-                        logging.error('%r finished with error: %s' % (url, e))
-                    else:
-                        logging.info(data)
+            await self.run()
+            await asyncio.sleep(self.time)
 
-    def run(self):
-        t = Thread(target=self.__run)
-        t.setDaemon(True)
-        t.start()
+    def start(self):
+        loop = asyncio.get_running_loop()
+        loop.create_task(self._run())
+
+    async def run(self):
+        tasks = []
+
+        async for conn in get_session():
+            rows = await get_and_update_tasks(conn)
+            for row in rows:
+                parser = Parser(conn)
+                task = asyncio.create_task(
+                    parser.parse_page(row)
+                )
+
+                task.add_done_callback(parser.get_parse_result)
+                tasks.append(task)
+
+            await asyncio.gather(*tasks)
+

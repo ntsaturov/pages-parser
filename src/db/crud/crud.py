@@ -1,44 +1,47 @@
+from sqlalchemy import select
 from uuid import uuid4
 
-from sqlalchemy.orm import Session
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.models import models
 from src.db.models.models import Task
-from sqlalchemy import text
 
 
-def get_task(db: Session, task_id: str):
-    return db.query(models.Task).filter(models.Task.id == task_id).first()
+async def get_task(session: AsyncSession, task_id: str):
+    result = await session.execute(select(models.Task).where(models.Task.id == task_id).limit(1))
+    return result.scalars().first()
 
 
-def get_tasks(db: Session):
-    return db.query(models.Task).filter(models.Task.status == 0)
+async def get_tasks(session: AsyncSession):
+    result = await session.query(models.Task).filter(models.Task.status == 0)
+    return result
 
 
-def get_and_update_tasks(db: Session):
+async def get_and_update_tasks(session: AsyncSession):
     sql = text("update tasks as b set status = 10 "
-               "from (select * from tasks where status=0 order by creation_timestamp asc "
+               "from (select * from tasks where status=0 order by creation_timestamp asc limit 100 "
                "for update skip locked) as a where b.id = a.id  returning b.*")
-    results = db.execute(sql)
-    db.commit()
+    results = await session.execute(sql)
+    await session.commit()
     return results
 
 
-def create_task(db: Session, url: str):
+async def create_task(session: AsyncSession, url: str):
     db_item = models.Task(id=str(uuid4()), url=url)
-    db.add(db_item)
-    db.commit()
-    db.refresh(db_item)
+    session.add(db_item)
+    await session.commit()
+    await session.refresh(db_item)
     return db_item
 
 
-def update_task(db: Session, task: Task):
-    row = db.get(Task, task.id)
+async def update_task(session: AsyncSession, task: Task):
+    row = await session.get(Task, task.id)
     if row:
         row.status = task.status
         row.data = task.data
         row.execution_timestamp = task.execution_timestamp
-        db.add(row)
-        db.commit()
-        db.refresh(row)
+        session.add(row)
+        await session.commit()
+        await session.refresh(row)
     return row
